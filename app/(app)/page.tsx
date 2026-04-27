@@ -63,6 +63,11 @@ export default async function HomePage() {
           </Link>
         </div>
       )}
+      <footer className="mt-12 text-center">
+        <Link href="/privacy" className="text-xs" style={{ color: 'var(--text-muted)' }}>
+          Privacy Policy
+        </Link>
+      </footer>
     </div>
   )
 }
