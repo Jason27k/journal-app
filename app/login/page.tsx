@@ -25,6 +25,11 @@ export default function LoginPage() {
           <GoogleIcon />
           Continue with Google
         </button>
+        <p className="mt-6 text-center text-xs text-neutral-600">
+          <a href="/privacy" className="hover:text-neutral-400 transition-colors">
+            Privacy Policy
+          </a>
+        </p>
       </div>
     </div>
   )
