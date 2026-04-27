@@ -58,7 +58,15 @@ export function Sidebar() {
           )
         })}
 
-        <div className="mt-auto">
+        <div className="mt-auto flex flex-col gap-1">
+          <a
+            href="/export"
+            download
+            className="rounded-lg px-3 py-2 text-sm transition-colors"
+            style={{ color: 'var(--text-muted)' }}
+          >
+            Export
+          </a>
           <button
             onClick={signOut}
             className="w-full text-left rounded-lg px-3 py-2 text-sm transition-colors"

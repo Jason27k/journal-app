@@ -1,19 +1,30 @@
 import { createClient } from '@/lib/supabase/server'
 import { CalendarGrid } from './calendar-grid'
+import { YearNav } from './year-nav'
 import { startOfYear, endOfYear } from 'date-fns'
 
-export default async function CalendarPage() {
+interface CalendarPageProps {
+  searchParams: Promise<{ year?: string }>
+}
+
+export default async function CalendarPage({ searchParams }: CalendarPageProps) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const now = new Date()
+  const currentYear = new Date().getFullYear()
+  const { year: yearParam } = await searchParams
+  const year = Math.min(currentYear, parseInt(yearParam ?? String(currentYear), 10) || currentYear)
+
+  const yearStart = startOfYear(new Date(year, 0))
+  const yearEnd = endOfYear(new Date(year, 0))
+
   const { data: entries } = await supabase
     .from('entries')
     .select('created_at')
     .eq('user_id', user!.id)
     .is('deleted_at', null)
-    .gte('created_at', startOfYear(now).toISOString())
-    .lte('created_at', endOfYear(now).toISOString())
+    .gte('created_at', yearStart.toISOString())
+    .lte('created_at', yearEnd.toISOString())
 
   const counts: Record<string, number> = {}
   for (const entry of entries ?? []) {
@@ -23,10 +34,11 @@ export default async function CalendarPage() {
 
   return (
     <div className="px-4 py-6 max-w-2xl mx-auto">
-      <h2 className="text-xl font-semibold mb-6" style={{ color: 'var(--text)' }}>
-        {now.getFullYear()}
-      </h2>
-      <CalendarGrid counts={counts} year={now.getFullYear()} />
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-semibold" style={{ color: 'var(--text)' }}>{year}</h2>
+        <YearNav year={year} maxYear={currentYear} />
+      </div>
+      <CalendarGrid counts={counts} year={year} />
     </div>
   )
 }

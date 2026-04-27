@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { EntryCard } from '@/components/entry/entry-card'
 import Link from 'next/link'
 import { format } from 'date-fns'
+import type { EntryWithTags } from '@/lib/types'
+import { flattenTags } from '@/lib/types'
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -11,14 +13,16 @@ export default async function HomePage() {
   const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString()
   const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString()
 
-  const { data: entries } = await supabase
+  const { data } = await supabase
     .from('entries')
-    .select('*')
+    .select('*, entry_tags(tags(id, name))')
     .eq('user_id', user!.id)
     .is('deleted_at', null)
     .gte('created_at', startOfDay)
     .lt('created_at', endOfDay)
     .order('created_at', { ascending: false })
+
+  const entries = (data ?? []) as EntryWithTags[]
 
   return (
     <div className="px-4 py-6 max-w-2xl mx-auto">
@@ -40,10 +44,10 @@ export default async function HomePage() {
         </Link>
       </div>
 
-      {entries && entries.length > 0 ? (
+      {entries.length > 0 ? (
         <div className="flex flex-col gap-3">
           {entries.map(entry => (
-            <EntryCard key={entry.id} entry={entry} />
+            <EntryCard key={entry.id} entry={entry} tags={flattenTags(entry)} />
           ))}
         </div>
       ) : (
@@ -54,11 +58,7 @@ export default async function HomePage() {
           <p className="text-sm mb-3" style={{ color: 'var(--text-muted)' }}>
             Nothing written today yet.
           </p>
-          <Link
-            href="/entry/new"
-            className="text-sm font-medium underline"
-            style={{ color: 'var(--text)' }}
-          >
+          <Link href="/entry/new" className="text-sm font-medium underline" style={{ color: 'var(--text)' }}>
             Start writing
           </Link>
         </div>

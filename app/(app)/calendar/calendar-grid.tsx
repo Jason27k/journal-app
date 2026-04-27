@@ -63,7 +63,7 @@ function MonthGrid({
           return (
             <Link
               key={dateStr}
-              href={`/search?q=${dateStr}`}
+              href={`/search?from=${dateStr}&to=${dateStr}`}
               title={count ? `${count} entr${count !== 1 ? 'ies' : 'y'}` : undefined}
               className="aspect-square rounded-sm flex items-center justify-center transition-opacity hover:opacity-70"
               style={{

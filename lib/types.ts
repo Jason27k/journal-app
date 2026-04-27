@@ -144,6 +144,16 @@ export type Tag = Database['public']['Tables']['tags']['Row']
 export type Goal = Database['public']['Tables']['goals']['Row']
 export type Hobby = Database['public']['Tables']['hobbies']['Row']
 
+export type TagRow = { id: string; name: string }
+
+export type EntryWithTags = Entry & {
+  entry_tags: Array<{ tags: TagRow | null }>
+}
+
+export function flattenTags(entry: EntryWithTags): TagRow[] {
+  return entry.entry_tags.flatMap(et => (et.tags ? [et.tags] : []))
+}
+
 export const TEMPLATES = {
   blank: { label: 'Blank', content: '' },
   daily_log: {

@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { EntryCard } from '@/components/entry/entry-card'
-import { format, subYears } from 'date-fns'
+import { format } from 'date-fns'
+import type { EntryWithTags } from '@/lib/types'
+import { flattenTags } from '@/lib/types'
 
 export default async function OnThisDayPage() {
   const supabase = await createClient()
@@ -10,21 +12,21 @@ export default async function OnThisDayPage() {
   const month = today.getMonth() + 1
   const day = today.getDate()
 
-  const { data: entries } = await supabase
+  const { data } = await supabase
     .from('entries')
-    .select('*')
+    .select('*, entry_tags(tags(id, name))')
     .eq('user_id', user!.id)
     .is('deleted_at', null)
-    .lt('created_at', subYears(today, 0).toISOString().slice(0, 10)) // exclude today
+    .lt('created_at', today.toISOString().slice(0, 10))
     .order('created_at', { ascending: false })
 
   // Filter client-side to same month/day (Postgres doesn't do this well without a function)
-  const onThisDay = (entries ?? []).filter(entry => {
+  const onThisDay = ((data ?? []) as EntryWithTags[]).filter(entry => {
     const d = new Date(entry.created_at)
     return d.getMonth() + 1 === month && d.getDate() === day
   })
 
-  const byYear = onThisDay.reduce<Record<number, typeof onThisDay>>((acc, entry) => {
+  const byYear = onThisDay.reduce<Record<number, EntryWithTags[]>>((acc, entry) => {
     const year = new Date(entry.created_at).getFullYear()
     if (!acc[year]) acc[year] = []
     acc[year].push(entry)
@@ -52,7 +54,7 @@ export default async function OnThisDayPage() {
             </h3>
             <div className="flex flex-col gap-3">
               {byYear[year].map(entry => (
-                <EntryCard key={entry.id} entry={entry} />
+                <EntryCard key={entry.id} entry={entry} tags={flattenTags(entry)} />
               ))}
             </div>
           </section>
