@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 const navItems = [
+  { href: '/habits', label: 'Habits', description: 'Track daily and weekly habits' },
+  { href: '/stats', label: 'Stats', description: 'Your writing stats and streaks' },
   { href: '/on-this-day', label: 'On This Day', description: 'What you wrote on this date in past years' },
   { href: '/calendar', label: 'Calendar', description: 'Entry heatmap for the year' },
   { href: '/hobbies', label: 'Hobbies', description: 'Track your interests over time' },

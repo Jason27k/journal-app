@@ -133,6 +133,57 @@ export type Database = {
         Update: { hobby_id?: string; entry_id?: string }
         Relationships: []
       }
+      habits: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          frequency: string
+          created_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          frequency?: string
+          created_at?: string
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          frequency?: string
+          created_at?: string
+          deleted_at?: string | null
+        }
+        Relationships: []
+      }
+      habit_completions: {
+        Row: {
+          id: string
+          habit_id: string
+          user_id: string
+          completed_date: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          habit_id: string
+          user_id: string
+          completed_date: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          habit_id?: string
+          user_id?: string
+          completed_date?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
@@ -143,6 +194,8 @@ export type Entry = Database['public']['Tables']['entries']['Row']
 export type Tag = Database['public']['Tables']['tags']['Row']
 export type Goal = Database['public']['Tables']['goals']['Row']
 export type Hobby = Database['public']['Tables']['hobbies']['Row']
+export type Habit = Database['public']['Tables']['habits']['Row']
+export type HabitCompletion = Database['public']['Tables']['habit_completions']['Row']
 
 export type TagRow = { id: string; name: string }
 

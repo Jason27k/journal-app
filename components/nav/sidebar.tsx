@@ -7,10 +7,12 @@ import { createClient } from '@/lib/supabase/client'
 const navItems = [
   { href: '/', label: 'Home' },
   { href: '/search', label: 'Search' },
+  { href: '/habits', label: 'Habits' },
+  { href: '/goals', label: 'Goals' },
   { href: '/on-this-day', label: 'On This Day' },
   { href: '/calendar', label: 'Calendar' },
-  { href: '/goals', label: 'Goals' },
   { href: '/hobbies', label: 'Hobbies' },
+  { href: '/stats', label: 'Stats' },
 ]
 
 export function Sidebar() {
