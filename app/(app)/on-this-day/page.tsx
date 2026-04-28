@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getUserTz, getTodayBounds, toLocalDateStr } from '@/lib/date'
 import { EntryCard } from '@/components/entry/entry-card'
 import { format } from 'date-fns'
 import type { EntryWithTags } from '@/lib/types'
@@ -8,26 +9,24 @@ export default async function OnThisDayPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const today = new Date()
-  const month = today.getMonth() + 1
-  const day = today.getDate()
+  const tz = await getUserTz()
+  const { start, displayDate, y, m, d } = getTodayBounds(tz)
 
   const { data } = await supabase
     .from('entries')
     .select('*, entry_tags(tags(id, name))')
     .eq('user_id', user!.id)
     .is('deleted_at', null)
-    .lt('created_at', today.toISOString().slice(0, 10))
+    .lt('created_at', start)
     .order('created_at', { ascending: false })
 
-  // Filter client-side to same month/day (Postgres doesn't do this well without a function)
   const onThisDay = ((data ?? []) as EntryWithTags[]).filter(entry => {
-    const d = new Date(entry.created_at)
-    return d.getMonth() + 1 === month && d.getDate() === day
+    const [ey, em, ed] = toLocalDateStr(new Date(entry.created_at), tz).split('-').map(Number)
+    return em === m + 1 && ed === d && ey !== y
   })
 
   const byYear = onThisDay.reduce<Record<number, EntryWithTags[]>>((acc, entry) => {
-    const year = new Date(entry.created_at).getFullYear()
+    const year = Number(toLocalDateStr(new Date(entry.created_at), tz).split('-')[0])
     if (!acc[year]) acc[year] = []
     acc[year].push(entry)
     return acc
@@ -39,7 +38,7 @@ export default async function OnThisDayPage() {
     <div className="px-4 py-6 max-w-2xl mx-auto">
       <h2 className="text-xl font-semibold" style={{ color: 'var(--text)' }}>On This Day</h2>
       <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
-        {format(today, 'MMMM d')} in previous years
+        {format(displayDate, 'MMMM d')} in previous years
       </p>
 
       {years.length === 0 ? (
@@ -50,7 +49,7 @@ export default async function OnThisDayPage() {
         years.map(year => (
           <section key={year} className="mb-8">
             <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-muted)' }}>
-              {year} · {today.getFullYear() - year} year{today.getFullYear() - year !== 1 ? 's' : ''} ago
+              {year} · {y - year} year{y - year !== 1 ? 's' : ''} ago
             </h3>
             <div className="flex flex-col gap-3">
               {byYear[year].map(entry => (

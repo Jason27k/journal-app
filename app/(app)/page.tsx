@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getUserTz, getTodayBounds } from '@/lib/date'
 import { EntryCard } from '@/components/entry/entry-card'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -8,18 +9,16 @@ import { flattenTags } from '@/lib/types'
 export default async function HomePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-
-  const today = new Date()
-  const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString()
-  const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString()
+  const tz = await getUserTz()
+  const { start, end, displayDate } = getTodayBounds(tz)
 
   const { data } = await supabase
     .from('entries')
     .select('*, entry_tags(tags(id, name))')
     .eq('user_id', user!.id)
     .is('deleted_at', null)
-    .gte('created_at', startOfDay)
-    .lt('created_at', endOfDay)
+    .gte('created_at', start)
+    .lt('created_at', end)
     .order('created_at', { ascending: false })
 
   const entries = (data ?? []) as EntryWithTags[]
@@ -29,10 +28,10 @@ export default async function HomePage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-xl font-semibold" style={{ color: 'var(--text)' }}>
-            {format(today, 'EEEE')}
+            {format(displayDate, 'EEEE')}
           </h2>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            {format(today, 'MMMM d, yyyy')}
+            {format(displayDate, 'MMMM d, yyyy')}
           </p>
         </div>
         <Link

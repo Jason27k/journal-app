@@ -10,16 +10,16 @@ interface TagInputProps {
   initialTags: TagRow[]
   allUserTags?: TagRow[]
   onTagsChange?: (tags: TagRow[]) => void
-  dropdownDirection?: 'up' | 'down'
 }
 
-export function TagInput({ entryId, initialTags, allUserTags, onTagsChange, dropdownDirection = 'down' }: TagInputProps) {
+export function TagInput({ entryId, initialTags, allUserTags, onTagsChange }: TagInputProps) {
   const [tags, setTags] = useState(initialTags)
   const [knownTags, setKnownTags] = useState(allUserTags ?? [])
   const [input, setInput] = useState('')
   const [open, setOpen] = useState(false)
   const [showInput, setShowInput] = useState(initialTags.length === 0)
   const inputRef = useRef<HTMLInputElement>(null)
+  const triggerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (showInput) inputRef.current?.focus()
@@ -46,6 +46,13 @@ export function TagInput({ entryId, initialTags, allUserTags, onTagsChange, drop
     .filter(t => !normalised || t.name.includes(normalised))
     .slice(0, 6)
   const canCreate = normalised.length > 0 && !knownTags.find(t => t.name === normalised)
+
+  function getDropdownStyle(): React.CSSProperties {
+    const el = triggerRef.current
+    if (!el) return {}
+    const { bottom, left, width } = el.getBoundingClientRect()
+    return { top: bottom + 4, left, minWidth: Math.max(width, 144) }
+  }
 
   async function addTag(name: string) {
     const trimmed = name.trim().toLowerCase()
@@ -98,7 +105,7 @@ export function TagInput({ entryId, initialTags, allUserTags, onTagsChange, drop
       {tags.map(tag => (
         <span
           key={tag.id}
-          className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs"
+          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm"
           style={{ background: 'var(--border)', color: 'var(--text)' }}
         >
           <Link href={`/search?tag=${encodeURIComponent(tag.name)}`} className="hover:underline">
@@ -106,7 +113,7 @@ export function TagInput({ entryId, initialTags, allUserTags, onTagsChange, drop
           </Link>
           <button
             onClick={() => removeTag(tag.id)}
-            className="leading-none hover:opacity-60"
+            className="text-base leading-none hover:opacity-60"
             style={{ color: 'var(--text-muted)' }}
           >
             ×
@@ -114,11 +121,11 @@ export function TagInput({ entryId, initialTags, allUserTags, onTagsChange, drop
         </span>
       ))}
 
-      <div className="relative">
+      <div ref={triggerRef} className="relative">
         {tags.length > 0 && !showInput ? (
           <button
             onClick={() => setShowInput(true)}
-            className="rounded-full border px-2.5 py-0.5 text-xs"
+            className="rounded-full border px-3 py-1 text-sm"
             style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}
           >
             + Add tag
@@ -141,8 +148,8 @@ export function TagInput({ entryId, initialTags, allUserTags, onTagsChange, drop
         )}
         {open && (suggestions.length > 0 || canCreate) && (
           <div
-            className={`absolute left-0 z-20 min-w-36 rounded-xl border shadow-lg py-1 ${dropdownDirection === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'}`}
-            style={{ background: 'var(--bg-card)', borderColor: 'var(--border)' }}
+            className="fixed z-[9999] rounded-xl border shadow-lg py-1"
+            style={{ ...getDropdownStyle(), background: 'var(--bg-card)', borderColor: 'var(--border)' }}
           >
             {suggestions.map(tag => (
               <button

@@ -32,40 +32,39 @@ export function TagSheet({ entryId, initialTags, allUserTags }: TagSheetProps) {
       </button>
 
       {open && entryId && (
-        <>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.5)' }}
+          onClick={() => setOpen(false)}
+        >
           <div
-            className="fixed inset-0 z-40"
-            style={{ background: 'rgba(0,0,0,0.4)' }}
-            onClick={() => setOpen(false)}
-          />
-          <div
-            className="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl shadow-xl"
+            className="w-full max-w-sm rounded-2xl shadow-2xl"
             style={{ background: 'var(--bg-card)' }}
+            onClick={e => e.stopPropagation()}
           >
             <div
               className="flex items-center justify-between px-4 py-3 border-b"
               style={{ borderColor: 'var(--border)' }}
             >
-              <span className="text-sm font-medium" style={{ color: 'var(--text)' }}>
-                Tags
-              </span>
+              <span className="text-sm font-medium" style={{ color: 'var(--text)' }}>Tags</span>
               <button
                 onClick={() => setOpen(false)}
-                className="text-sm font-medium"
-                style={{ color: 'var(--text)' }}
+                className="text-sm"
+                style={{ color: 'var(--text-muted)' }}
               >
-                Done
+                ✕
               </button>
             </div>
-            <TagInput
-              entryId={entryId}
-              initialTags={initialTags}
-              allUserTags={allUserTags}
-              onTagsChange={tags => setCount(tags.length)}
-              dropdownDirection="up"
-            />
+            <div className="overflow-y-auto max-h-56">
+              <TagInput
+                entryId={entryId}
+                initialTags={initialTags}
+                allUserTags={allUserTags}
+                onTagsChange={tags => setCount(tags.length)}
+              />
+            </div>
           </div>
-        </>
+        </div>
       )}
     </>
   )
