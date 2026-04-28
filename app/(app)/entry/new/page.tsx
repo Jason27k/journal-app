@@ -16,6 +16,7 @@ export default function NewEntryPage() {
   const entryIdRef = useRef<string | null>(null)
   const contentRef = useRef<string>('')
   const createdAtRef = useRef<string>('')
+  const discarded = useRef(false)
   const [entryId, setEntryId] = useState<string | null>(null)
 
   function handleTemplateSelect(key: TemplateKey) {
@@ -24,6 +25,7 @@ export default function NewEntryPage() {
   }
 
   async function handleSave(content: string) {
+    if (discarded.current) return
     contentRef.current = content
     const supabase = createClient()
     if (!entryIdRef.current) {
@@ -34,11 +36,16 @@ export default function NewEntryPage() {
         .select('id, created_at')
         .single()
       if (data) {
+        if (discarded.current) {
+          await supabase.from('entries').delete().eq('id', data.id)
+          return
+        }
         entryIdRef.current = data.id
         createdAtRef.current = data.created_at
         setEntryId(data.id)
       }
     } else {
+      if (discarded.current) return
       await supabase.from('entries').update({ content }).eq('id', entryIdRef.current)
     }
   }
@@ -56,7 +63,16 @@ export default function NewEntryPage() {
   }
 
   function handleDone() {
-    router.push(entryId ? `/entry/${entryId}` : '/')
+    router.push('/')
+  }
+
+  async function handleDiscard() {
+    discarded.current = true
+    if (entryIdRef.current) {
+      const supabase = createClient()
+      await supabase.from('entries').delete().eq('id', entryIdRef.current)
+    }
+    router.push('/')
   }
 
   if (initialContent === null) {
@@ -82,8 +98,8 @@ export default function NewEntryPage() {
         className="flex items-center justify-between px-4 py-3 border-b shrink-0"
         style={{ borderColor: 'var(--border)' }}
       >
-        <button onClick={handleDone} className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          ← Done
+        <button onClick={handleDiscard} className="text-sm" style={{ color: 'var(--text-muted)' }}>
+          Discard
         </button>
         <div className="flex items-center gap-2">
           {entryId && (
@@ -96,6 +112,9 @@ export default function NewEntryPage() {
             </button>
           )}
           <TagSheet entryId={entryId} initialTags={[]} />
+          <button onClick={handleDone} className="text-sm font-medium" style={{ color: 'var(--text)' }}>
+            Done
+          </button>
         </div>
       </div>
       <div className="flex-1 overflow-hidden">

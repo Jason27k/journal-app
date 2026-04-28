@@ -1,11 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
+import { getUserTz, getTodayBounds, toLocalDateStr } from '@/lib/date'
 import { format } from 'date-fns'
 
 function wordCount(content: string): number {
   return content.trim() ? content.trim().split(/\s+/).length : 0
 }
 
-function computeStreaks(dates: string[]): { current: number; longest: number } {
+function computeStreaks(dates: string[], todayStr: string, yestStr: string): { current: number; longest: number } {
   const unique = [...new Set(dates)].sort()
   if (unique.length === 0) return { current: 0, longest: 0 }
 
@@ -23,10 +24,7 @@ function computeStreaks(dates: string[]): { current: number; longest: number } {
     }
   }
 
-  const todayStr = new Date().toISOString().slice(0, 10)
-  const yestStr = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
   const set = new Set(unique)
-
   let current = 0
   const start = set.has(todayStr) ? todayStr : set.has(yestStr) ? yestStr : null
   if (start) {
@@ -46,6 +44,11 @@ export default async function StatsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
+  const tz = await getUserTz()
+  const { displayDate, localDateStr: todayStr, y, m, d, offsetMs } = getTodayBounds(tz)
+  const localYest = new Date(new Date().getTime() + offsetMs - 86400000)
+  const yestStr = `${localYest.getUTCFullYear()}-${String(localYest.getUTCMonth() + 1).padStart(2, '0')}-${String(localYest.getUTCDate()).padStart(2, '0')}`
+
   const { data } = await supabase
     .from('entries')
     .select('created_at, content')
@@ -59,26 +62,23 @@ export default async function StatsPage() {
   const totalWords = entries.reduce((sum, e) => sum + wordCount(e.content), 0)
   const avgWords = totalEntries ? Math.round(totalWords / totalEntries) : 0
 
-  const dates = entries.map(e => e.created_at.slice(0, 10))
+  const dates = entries.map(e => toLocalDateStr(new Date(e.created_at), tz))
   const uniqueDates = [...new Set(dates)]
   const daysActive = uniqueDates.length
-  const { current: currentStreak, longest: longestStreak } = computeStreaks(dates)
+  const { current: currentStreak, longest: longestStreak } = computeStreaks(dates, todayStr, yestStr)
 
   const firstEntry = entries[0] ? new Date(entries[0].created_at) : null
 
   const dayCounts = new Array(7).fill(0)
-  for (const d of dates) {
-    dayCounts[new Date(d + 'T12:00:00Z').getUTCDay()]++
+  for (const ds of dates) {
+    dayCounts[new Date(ds + 'T12:00:00Z').getUTCDay()]++
   }
   const mostActiveDay = totalEntries ? DAY_NAMES[dayCounts.indexOf(Math.max(...dayCounts))] : null
 
-  const now = new Date()
-  const thisYear = now.getFullYear()
-  const thisMonth = now.getMonth()
-  const entriesThisYear = entries.filter(e => new Date(e.created_at).getFullYear() === thisYear).length
-  const entriesThisMonth = entries.filter(e => {
-    const d = new Date(e.created_at)
-    return d.getFullYear() === thisYear && d.getMonth() === thisMonth
+  const entriesThisYear = dates.filter(ds => Number(ds.split('-')[0]) === y).length
+  const entriesThisMonth = dates.filter(ds => {
+    const [dy, dm] = ds.split('-').map(Number)
+    return dy === y && dm === m + 1
   }).length
 
   return (
@@ -109,8 +109,8 @@ export default async function StatsPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-3 mb-3">
-            <StatCard label={format(now, 'MMMM')} value={`${entriesThisMonth} ${entriesThisMonth === 1 ? 'entry' : 'entries'}`} />
-            <StatCard label={String(thisYear)} value={`${entriesThisYear} ${entriesThisYear === 1 ? 'entry' : 'entries'}`} />
+            <StatCard label={format(displayDate, 'MMMM')} value={`${entriesThisMonth} ${entriesThisMonth === 1 ? 'entry' : 'entries'}`} />
+            <StatCard label={String(y)} value={`${entriesThisYear} ${entriesThisYear === 1 ? 'entry' : 'entries'}`} />
           </div>
 
           {mostActiveDay && (
