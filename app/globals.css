@@ -81,3 +81,98 @@ body {
 }
 .prose p:first-child { margin-top: 0; }
 .prose p:last-child { margin-bottom: 0; }
+
+/* Task list */
+.prose ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+.prose ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.prose ul[data-type="taskList"] li > label {
+  flex: 0 0 auto;
+  margin-top: 0.5px;
+  user-select: none;
+}
+.prose ul[data-type="taskList"] li p {
+  margin: 0;
+  line-height: 1.7;
+}
+.prose li[data-checked="true"] > div p {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+.prose ul[data-type="taskList"] li > div {
+  flex: 1 1 auto;
+}
+
+/* Tables */
+.prose table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  font-size: 0.9em;
+  table-layout: fixed;
+}
+.prose th, .prose td {
+  border: 1px solid var(--border);
+  padding: 0.5em 0.75em;
+  text-align: left;
+  vertical-align: top;
+  position: relative;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 2em;
+}
+.prose th {
+  background: var(--bg-card);
+  font-weight: 600;
+}
+.prose .selectedCell { background: color-mix(in srgb, var(--text) 8%, transparent); }
+.column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: transparent;
+  pointer-events: none;
+  z-index: 10;
+  transition: background 0.15s;
+}
+.ProseMirror.resize-cursor { cursor: col-resize; }
+.ProseMirror.resize-cursor .column-resize-handle { background: color-mix(in srgb, var(--text) 25%, transparent); }
+
+/* YouTube / Twitch embeds */
+.prose iframe {
+  display: block;
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 1em 0;
+  border: none;
+}
+
+/* Highlight */
+.prose mark {
+  background-color: #fef08a;
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 0.1em;
+}
+@media (prefers-color-scheme: dark) {
+  .prose mark { background-color: #713f12; }
+}
+
+/* Math */
+.tiptap-mathematics-render {
+  cursor: pointer;
+  padding: 0.1em 0.2em;
+  border-radius: 4px;
+}
+.tiptap-mathematics-render--editable:hover {
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+[data-type="block-math"] { display: block; text-align: center; margin: 1em 0; }
