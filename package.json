@@ -11,27 +11,27 @@
   "dependencies": {
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.105.0",
-    "@tiptap/extension-highlight": "3.22.4",
-    "@tiptap/extension-mathematics": "3.22.4",
-    "@tiptap/extension-placeholder": "3.22.4",
-    "@tiptap/extension-table": "3.22.4",
-    "@tiptap/extension-task-item": "3.22.4",
-    "@tiptap/extension-task-list": "3.22.4",
-    "@tiptap/extension-twitch": "3.22.4",
-    "@tiptap/extension-typography": "3.22.4",
-    "@tiptap/extension-youtube": "3.22.4",
-    "@tiptap/pm": "3.22.4",
-    "@tiptap/react": "3.22.4",
-    "@tiptap/starter-kit": "3.22.4",
+    "@tiptap/extension-highlight": "3.34.0",
+    "@tiptap/extension-mathematics": "3.34.0",
+    "@tiptap/extension-placeholder": "3.34.0",
+    "@tiptap/extension-table": "3.34.0",
+    "@tiptap/extension-task-item": "3.34.0",
+    "@tiptap/extension-task-list": "3.34.0",
+    "@tiptap/extension-twitch": "3.34.0",
+    "@tiptap/extension-typography": "3.34.0",
+    "@tiptap/extension-youtube": "3.34.0",
+    "@tiptap/pm": "3.34.0",
+    "@tiptap/react": "3.34.0",
+    "@tiptap/starter-kit": "3.34.0",
     "date-fns": "^4.1.0",
     "katex": "^0.16.45",
-    "next": "16.2.6",
+    "next": "16.4.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "tiptap-markdown": "^0.9.0"
   },
   "overrides": {
-    "postcss": "^8.5.10"
+    "postcss": "^8.5.23"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -39,7 +39,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.6",
+    "eslint-config-next": "16.4.6",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
